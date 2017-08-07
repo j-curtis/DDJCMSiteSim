@@ -39,9 +39,23 @@ class DDJCMSim:
 		"""Generates an array of times given the current parameters"""
 		self.times = np.linspace(0,self.maxTime,self.numTimeSteps) 
 
+	def holsteinPrimakoff(self,hp_cutoff):
+		"""Re-runs the simulation but this time uses a Holstein-Primakoff Hamiltoninan"""
+		self.cutoffHP = hp_cutoff
+		self.aHP = qt.tensor(qt.eye(self.cutoffHP),qt.destroy(self.cutoff))	#Cavity boson 
+		self.bHP = qt.tensor(qt.destroy(self.cutoffHP),qt.qeye(self.cutoff))	#Holstein Primakoff boson
+
+		self.collapseHP = [np.sqrt(self.decays[0])*self.a]	#A the moment we do not allow for spontaneous emission in Holstein Primakoff
+		self.measure = [self.aHP,self.aHP.dag()*self.aHP,self.bHP,self.bHP.dag()*self.bHP ]	#Measure population and coherence for each
+
+		self.initKetHP = qt.tensor(qt.bsis(self.cutoffHP,0),qt.basis(self,cutoff,0))	#We start at the critical point values of the unentangled fields
+		self.HHP = self.coupling/2.0 *( self.aHP.dag() + self.aHP)*(self.bHP.dag()*self.bHP - 1) + drive*(self.aHP.dag()+self.aHP) + coupling/2.0*(1.j)*(self.aHP.dag() - self.aHP)*(self.bHP.dag()+self.bHP) 	#This is the form of the HP Hamiltonian to quadratic order with no detuning
+
+		self.rho = qt.mesolve(self.HHP,self.initKetHP,self.times,self.collapseHP,self.measureHP)
+
 	def runSim(self):
 		"""Runs the QuTip mesolve method and computes the density matrix"""
-		self.rho = qt.mesolve(self.H,self.initKet,self.times,self.collapse,self.measure)
+		self.rhoHP = qt.mesolve(self.H,self.initKet,self.times,self.collapse,self.measure)
 	
 
 def main():

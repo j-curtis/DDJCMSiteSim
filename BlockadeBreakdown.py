@@ -21,7 +21,7 @@ def main():
 	#DRIVE PARAMETERS
 	min_drive = 0.0	#Sweep drive stength from this
 	max_drive = 1.0	#To this
-	num_drive = 20	#With this many steps
+	num_drive = 4	#With this many steps
 
 	drives = np.linspace(min_drive,max_drive,num_drive)	#array of the drives to use
 
@@ -32,7 +32,7 @@ def main():
 	#SYSTEM SIZE PARAMETERS
 	min_size = 100	#Minimum Hilbert space size
 	max_size = 500	#Maximum Hilber space size
-	num_size = 20	#Number of system size points
+	num_size = 4	#Number of system size points
 
 	sizes = np.linspace(min_size,max_size,num_size,dtype=np.int16)		#array of system sizes to use
 
@@ -58,11 +58,22 @@ def main():
 
 			sim.runSim()
 
-			coherence[d,s] = sim.rho.expect[0]
-			population[d,s] = sim.rho.expect[1]
+			coherence[d,s] = sim.rho.expect[0][-1]
+			population[d,s] = sim.rho.expect[1][-1]
 
 	
-
+	
 		
+	#WRITE DATA TO A FILE 
+	np.savetxt("Coherence.csv",coherence,delimiter=",")
+	np.savetxt("Population.csv",population,delimiter=",")
+	
+	params = np.array(["min_drive = "+min_drive,"max_drive= "+max_drive, "num_drive = "+num_drive,"min_size = "+min_size,"max_size = "+max_size,"num_sizes = "+num_sizes,"max_time = "+max_time, "num_times = "+num_times, "decay = "+decay])
+	np.savetxt("Parameters.csv",params,delimiter = ";" ) 
+	
+
+main()
+
+
 
 
