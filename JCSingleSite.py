@@ -51,11 +51,11 @@ class DDJCMSim:
 		self.initKetHP = qt.tensor(qt.bsis(self.cutoffHP,0),qt.basis(self,cutoff,0))	#We start at the critical point values of the unentangled fields
 		self.HHP = self.coupling/2.0 *( self.aHP.dag() + self.aHP)*(self.bHP.dag()*self.bHP - 1) + drive*(self.aHP.dag()+self.aHP) + coupling/2.0*(1.j)*(self.aHP.dag() - self.aHP)*(self.bHP.dag()+self.bHP) 	#This is the form of the HP Hamiltonian to quadratic order with no detuning
 
-		self.rho = qt.mesolve(self.HHP,self.initKetHP,self.times,self.collapseHP,self.measureHP)
+		self.rhoHP = qt.mesolve(self.HHP,self.initKetHP,self.times,self.collapseHP,self.measureHP)
 
 	def runSim(self):
 		"""Runs the QuTip mesolve method and computes the density matrix"""
-		self.rhoHP = qt.mesolve(self.H,self.initKet,self.times,self.collapse,self.measure)
+		self.rho = qt.mesolve(self.H,self.initKet,self.times,self.collapse,self.measure)
 	
 
 def main():
