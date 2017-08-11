@@ -11,29 +11,28 @@ class DDJCMSim:
 		"""Initializes an instance of the simulation and sets parameters to defaults"""
 		self.cutoff = cutoff_param 	#Max photon count in Hilbert space 		
 
-		self.detuning = 0	#We assume cavity and atom are resonant with each other. This is cav_freq - drive_freq
-		self.drive = 0		#External drive strength. We drive the field X quadrature
+		self.detuning = 0.0	#We assume cavity and atom are resonant with each other. This is cav_freq - drive_freq
+		self.drive = 0.0		#External drive strength. We drive the field X quadrature
 
-		self.coupling = 1	#Jaynes-Cummings coupling between atom and cavity in RWA
+		self.coupling = 1.0	#Jaynes-Cummings coupling between atom and cavity in RWA
 	
 		self.decays = [0.5,0.0]	#The decay rates are [0] = cavity SE, [1] = atom SE
 		
-		self.maxTime = 40	#Max time integrated to
+		self.maxTime = 40.0	#Max time integrated to
 		self.numTimeSteps = 400	#Number of time steps integrated for 
 		
 		self.a = qt.tensor( qt.qeye(2),qt.destroy(self.cutoff))	#Lowering operator for the cavity in the Hilbert space H = Hspin x Hcav
-		self.sigma = [ qt.tensor( qt.sigmax(), qt.qeye(self.cutoff) ), qt.tensor( qt.sigmay(), qt.qeye(self.cutoff) ), qt.tensor(qt.sigmaz(),qt.qeye(self.cutoff))]	#Pauli algebra for the spin
-		self.sigmin = 0.5*(self.sigma[0] -0.j*self.sigma[1] )	#atomic lowering operator |0><1|
+		self.sigma = qt.tensor( qt.destroy(2), qt.qeye(self.cutoff) )	#Atomic lowering operator |0><1|
 		
-		self.collapse = [np.sqrt( self.decays[0])*self.a, np.sqrt(self.decays[1])*self.sigmin ]	#collapse operators for the master equation
-		self.measure = [self.a, self.a.dag()*self.a ]	#operators we want to measure the expected values for 
+		self.collapse = [np.sqrt( self.decays[0])*self.a, np.sqrt(self.decays[1])*self.sigma ]	#collapse operators for the master equation
+		self.measure = [self.a, self.a.dag()*self.a,self.sigma.dag()*self.sigma ]	#operators we want to measure the expected values for 
 		self.numMeasure = len(self.measure)	#The number of operators we are measuring
 
 		self.initKet = qt.tensor( qt.basis(2,0),qt.basis(self.cutoff,0) )	#initializes the state as a pure state in the vacuum 
 
 	def genHamiltonian(self):
 		"""Generates the Hamiltonian from the current parameters"""
-		self.H = self.detuning*(self.a.dag()*self.a + 0.5*self.sigma[2] )+self.drive*(self.a + self.a.dag() ) + self.coupling*(self.a*self.sigmin.dag() + self.a.dag()*self.sigmin )	#Driven Jaynes-Cummings model in the rotating frame 
+		self.H = self.detuning*(self.a.dag()*self.a + self.sigma.dag()*self.sigma )+self.drive*(self.a + self.a.dag() ) + self.coupling*(self.a*self.sigma.dag() + self.a.dag()*self.sigma )	#Driven Jaynes-Cummings model in the rotating frame 
 		
 	def genTimes(self):
 		"""Generates an array of times given the current parameters"""
@@ -61,8 +60,6 @@ class DDJCMSim:
 def main():
 	
 	sim1 = DDJCMSim(300)	
-
-	sim1.coupling = 0
 
 	sim1.genHamiltonian()
 	sim1.genTimes()
