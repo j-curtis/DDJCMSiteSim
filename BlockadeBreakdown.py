@@ -21,7 +21,7 @@ def main():
 	#DRIVE PARAMETERS
 	min_drive = 0.0	#Sweep drive stength from this
 	max_drive = 1.0	#To this
-	num_drive = 1	#With this many steps
+	num_drive = 8	#With this many steps
 
 	drives = np.linspace(min_drive,max_drive,num_drive)	#array of the drives to use
 
@@ -31,8 +31,8 @@ def main():
 
 	#SYSTEM SIZE PARAMETERS
 	min_size = 100	#Minimum Hilbert space size
-	max_size = 500	#Maximum Hilber space size
-	num_size = 1	#Number of system size points
+	max_size = 400	#Maximum Hilber space size
+	num_size = 4	#Number of system size points
 
 	sizes = np.linspace(min_size,max_size,num_size,dtype=np.int16)		#array of system sizes to use
 
