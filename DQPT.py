@@ -24,4 +24,20 @@ def H(cutoff, drive, coupling):
 def propagator(t, H):
 	"""Computes the propagator exp(-itH) extended to complex time """
 
-	return (-np. 
+	return ( -1.j*t*H).expm()	
+
+
+
+def main():
+	t = 1.0 + 0.0j
+	g = 1.0
+	D = 0.25
+	nPhoton = 1000
+
+	ham = H(nPhoton,D,g)
+
+	prop = propagator(t,ham)
+
+if __name__ == "__main__":
+	main()
+ 
