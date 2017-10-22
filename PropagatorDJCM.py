@@ -30,20 +30,33 @@ def Propagator(N,x,y):
 
 def main():
 	
-	N = 500
+	N = 200
 	vac = qt.tensor(qt.basis(2), qt.basis(N) )
 
 	ratio = .25	#ratio of y/x = E/g = .5 control-parameter
 			#critical point occurs at ratio = .5
+	
+	numSweep = 50
+	OTOC = np.zeros(shape = numSweep)
 
-	scale = np.linspace( 0.0, 100.0, 50)	#x = scale sets the overall time scale
+	scale = np.linspace( 0.0, 10.0, numSweep)	#x = scale sets the overall time scale
 						#this is the parameter we sweep to look for DQPT
 
+	index = 0
 	for x in scale:
 		y = ratio*x
 		h,a,s,u = Propagator(N,x,y)
 
-		print( qt.expect(u, vac) )
+		#Compute OTOC
+		#OTOC of interest is <vac | ( [ a(t) , a(0)^\dagger ] )^2 |vac> 
+		at = u.dag() * a * u 
+		commutator = ( at*a.dag() - (a.dag() )*at)
+		commSquare = commutator**2
+
+		OTOC[index] += qt.expect( commSquare, vac)
+	
+		print( OTOC[index] )
+		index+= 1
 	
 
 if __name__ == "__main__":
