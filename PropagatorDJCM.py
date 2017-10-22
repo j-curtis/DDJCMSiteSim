@@ -5,7 +5,7 @@
 import numpy as np
 import qutip as qt
 
-def H(N,x,y):
+def Propagator(N,x,y):
 	"""
 	The Hamiltonian in the rotating frame
 	We use unitless couplings of 
@@ -16,41 +16,34 @@ def H(N,x,y):
 	This yields
 		H = x(a\sigma^\dagger + a^\dagger \sigma) + y(a+a^\dagger)
 	N is the cutoff on the cavity Hilbert space
+	It also returns the matrix exponential of e^(-i H(x,y) )
 	"""
 
 	a = qt.tensor( qt.qeye(2), qt.destroy(N) )
 	s = qt.tensor( qt.destroy(2), qt.qeye(N) )
 
 	h = x*(a*s.dag() + s*a.dag() ) + y*(a + a.dag() )
-	
-	return h, a, s
+	u = ( -1.j * h).expm()	
 
-def U(N,x,y):
-	"""
-	Matrix exponential of the Hamiltonian
-	
-	U = exp(-i*H(N,x,y) )
-	"""
-	h,a,s = H(N,x,y)
+	return h, a, s, u
 
-	u = ( (-1.j) *h ).expm() 
-
-	return u
 
 def main():
 	
-	N = 100
-	vac = qt.tensor(qt.basis(0), qt.basis(N) )
+	N = 500
+	vac = qt.tensor(qt.basis(2), qt.basis(N) )
 
-	x = 1.0
-	y = .25 
+	ratio = .25	#ratio of y/x = E/g = .5 control-parameter
+			#critical point occurs at ratio = .5
 
-	h,a,s = H(N,x,y)
+	scale = np.linspace( 0.0, 100.0, 50)	#x = scale sets the overall time scale
+						#this is the parameter we sweep to look for DQPT
 
-	u = U(N,x,y)
+	for x in scale:
+		y = ratio*x
+		h,a,s,u = Propagator(N,x,y)
 
-	print 
-
+		print( qt.expect(u, vac) )
 	
 
 if __name__ == "__main__":
