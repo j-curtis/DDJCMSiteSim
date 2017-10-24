@@ -4,6 +4,7 @@
 
 import numpy as np
 import qutip as qt
+from matplotlib import pyplot as plt
 
 def Propagator(N,x,y):
 	"""
@@ -33,7 +34,7 @@ def main():
 	N = 200
 	vac = qt.tensor(qt.basis(2), qt.basis(N) )
 
-	ratio = .25	#ratio of y/x = E/g = .5 control-parameter
+	ratio = .75	#ratio of y/x = E/g = .5 control-parameter
 			#critical point occurs at ratio = .5
 	
 	numSweep = 50
@@ -58,6 +59,8 @@ def main():
 		print( OTOC[index] )
 		index+= 1
 	
+	plt.plot(scale, OTOC, label="{}".format(ratio) )
+	plt.show() 
 
 if __name__ == "__main__":
 	main()
