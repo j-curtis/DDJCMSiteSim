@@ -34,32 +34,40 @@ def main():
 	N = 200
 	vac = qt.tensor(qt.basis(2), qt.basis(N) )
 
-	ratio = .75	#ratio of y/x = E/g = .5 control-parameter
-			#critical point occurs at ratio = .5
-	
-	numSweep = 50
-	OTOC = np.zeros(shape = numSweep)
+	ratio = [.25,.5,.75]	#ratio of y/x = E/g = .5 control-parameter
+				#critical point occurs at ratio = .5
+		
+	numSweep = 75
+	numTrial = len(ratio)
 
-	scale = np.linspace( 0.0, 10.0, numSweep)	#x = scale sets the overall time scale
+	OTOC = np.zeros(shape = (numSweep,numTrial) )
+
+	scale = np.linspace( 0.0, 15.0, numSweep)	#x = scale sets the overall time scale
 						#this is the parameter we sweep to look for DQPT
 
-	index = 0
-	for x in scale:
-		y = ratio*x
-		h,a,s,u = Propagator(N,x,y)
+	for i in np.arange(numSweep):
+		for j in np.arange(numTrial):
+			x = scale[i]
+			y = x * ratio[j]
+			
+			h,a,s,u = Propagator(N,x,y)
 
-		#Compute OTOC
-		#OTOC of interest is <vac | ( [ a(t) , a(0)^\dagger ] )^2 |vac> 
-		at = u.dag() * a * u 
-		commutator = ( at*a.dag() - (a.dag() )*at)
-		commSquare = commutator**2
+			#Compute OTOC
+			#OTOC of interest is <vac | ( [ a(t) , a(0)^\dagger ] )^2 |vac> 
+			at = u.dag() * a * u 
+			commutator = ( at*a.dag() - (a.dag() )*at)
+			commSquare = commutator**2
 
-		OTOC[index] += qt.expect( commSquare, vac)
+			OTOC[i,j] += qt.expect( commSquare, vac)
 	
-		print( OTOC[index] )
-		index+= 1
-	
-	plt.plot(scale, OTOC, label="{}".format(ratio) )
+	for t in np.arange(numTrial):	
+		plt.plot(scale, OTOC[:,t], label="{}".format(ratio[t]) )
+
+
+	plt.xlabel("time")
+	plt.ylabel("OTOC")
+	plt.title("OTOC for Driven Jaynes-Cummings Model")	
+
 	plt.show() 
 
 if __name__ == "__main__":
