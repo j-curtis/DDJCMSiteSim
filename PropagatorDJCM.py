@@ -95,12 +95,12 @@ def main():
 					OTOC[iCutoff,iX,iY,iTime] += np.real( qt.expect( OTOOperator, vac) )
 	
 
-	###Save data to file 
-	np.savetxt("cutoffList.txt", cutoffList)
-	np.savetxt("xList.txt", xList)
-	np.savetxt("yList.txt", yList)
-	np.savetxt("times.txt", times)
-	np.savetxt("OTOC.txt", OTOC)
+	###Save data to numpy file 
+	np.save("cutoffList.npy", cutoffList)
+	np.save("xList.npy", xList)
+	np.save("yList.npy", yList)
+	np.save("times.npy", times)
+	np.save("OTOC.npy", OTOC)
 	
 
 if __name__ == "__main__":
