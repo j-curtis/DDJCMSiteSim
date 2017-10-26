@@ -77,7 +77,7 @@ def main():
 		N = cutoffList[iCutoff]
 		vac = qt.tensor( qt.basis(2,0), qt.basis(N,0) )
 	
-		a = qt.tensor( qt.qeye(0) , qt.destroy(N) )
+		a = qt.tensor( qt.qeye(2) , qt.destroy(N) )
 
 		for iX in np.arange(numX):
 			x = xList[iX]
