@@ -35,7 +35,7 @@ def Propagator(N,x,y,t):
 
 def main():
 	
-	cutoffList = [25,50]		#different Hilbert space cutoffs we try, to extract some finite-size scaling
+	cutoffList = [100,200,300]		#different Hilbert space cutoffs we try, to extract some finite-size scaling
 	numCutoff = len(cutoffList)		#number in the Hilbert space cutoff list
 
 	xList = [1.0]				#different atom-cavity couplings we try
@@ -48,7 +48,7 @@ def main():
 						#y > .5 is continous spectrum, should be "isomorphic" to inverted oscillator, dynamical symemtry group solution still conceivable?
 	numY = len(yList)			#number of y parameters we try
 
-	numTimes = 25				#number of time-slices we calculate for 
+	numTimes = 200				#number of time-slices we calculate for 
 	maxTime = 100				#largest time we compute out to
 
 	times = np.linspace(0.0,maxTime,numTimes)	#time array
