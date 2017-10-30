@@ -74,7 +74,7 @@ def main():
 		a = qt.tensor( qt.qeye(2) , qt.destroy(N) )
 
 		for idrive in np.arange(numd):
-			d = xList[idrive]
+			d = dList[idrive]
 		
 			for iTime in np.arange(numTimes):
 				t = times[iTime]
