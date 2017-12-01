@@ -6,7 +6,7 @@ import numpy as np
 import qutip as qt
 from matplotlib import pyplot as plt
 
-def Propagator(N,d,t):
+def propagator(size_p,drive_p,time_p):
 	"""
 	The Hamiltonian in the rotating frame
 	We use unitless drive parameter of 
@@ -21,18 +21,35 @@ def Propagator(N,d,t):
 	N is the cutoff on the cavity Hilbert space
 	"""
 
-	a = qt.tensor( qt.qeye(2), qt.destroy(N) )
-	s = qt.tensor( qt.destroy(2), qt.qeye(N) )
+	a = qt.tensor( qt.qeye(2), qt.destroy(size_p) )
+	s = qt.tensor( qt.destroy(2), qt.qeye(size_p) )
 
-	h = a*s.dag() + s*a.dag() + d*(a + a.dag() )
-	u = ( -1.j *t* h).expm()	
+	h = a*s.dag() + s*a.dag() + drive_p*(a + a.dag() )
+	u = ( -1.j *time_p* h).expm()	
 
 	return u
 
+def ppCommutator(size_p,drive_p,time_p):
+    	"""
+    	Computes the time-dependent p-p commutator operator as 
+    	-i*[p(t),p(0)] 
+    	with p = i(a-a^+)/root2
+    	"""
+    	U = propagator(size_p,drive_p,time_p)
+    	a = qt.tensor(qt.qeye(2),qt.destroy(size_p))
+    
+    	return 0.5j*( U.dag()*( a-a.dag() )*U*( a-a.dag() ) - ( a-a.dag() )*U.dag()*( a-a.dag() )*U )
+
+
+def ppCEigenval(size_p,drive_p,time_p):
+	"""
+	Returns an array of the eigenvalues of the pp commutator
+	"""
+	return ppCommutator(size_p,drive_p,time_p).eigenenergies()
 
 def main():
 	
-	cutoffList = [100,200,300]		#different Hilbert space cutoffs we try, to extract some finite-size scaling
+	cutoffList = [100]		#different Hilbert space cutoffs we try, to extract some finite-size scaling
 	numCutoff = len(cutoffList)		#number in the Hilbert space cutoff list
 
 	dList = [0.0,.25,.5,.75]		#different drive strengths 
@@ -42,55 +59,21 @@ def main():
 						#d > .5 is continous spectrum, should be "isomorphic" to inverted oscillator, dynamical symemtry group solution still conceivable?
 	numd = len(dList)			#number of d parameters we try
 
-	numTimes = 200				#number of time-slices we calculate for 
-	maxTime = 100				#largest time we compute out to
+	numTimes = 4				#number of time-slices we calculate for 
+	maxTime = 50				#largest time we compute out to
 
 	times = np.linspace(0.0,maxTime,numTimes)	#time array
 
 
-	"""
-	We are interested in the behavior of the OTOC for the various parameter values given above 
-	We will store this in a large array with dimension 3 and lengths 
-	(numCutoff x numd x numTimes)
-	"""
-	
-	OTOC = np.zeros( shape = (numCutoff,numd,numTimes) )
+	"""Let us now compute the time dependent commutator and use this to determine the eigenvalue spectrum"""
 
-	"""
-	We will compute the OTOC for the state |vac> defined as 
-	|0>_cav \otimes |down>_spin
-	It is the vacuum of the d = 0 model
-
-	The operators we commute are 
-	a(t) and a^\dagger(0) 
-
-	and the OTOC is defined as -<vac| [a(t), a^+(0) ]^2|vac >
-	"""
-	
-	for iCutoff in np.arange(numCutoff):
-		N = cutoffList[iCutoff]
-		vac = qt.tensor( qt.basis(2,0), qt.basis(N,0) )
-	
-		a = qt.tensor( qt.qeye(2) , qt.destroy(N) )
-
-		for idrive in np.arange(numd):
-			d = dList[idrive]
-		
-			for iTime in np.arange(numTimes):
-				t = times[iTime]
-		
-				U = Propagator(N,d,t)
-
-				OTOOperator = -1.0 *( (U.dag() *a*U *a.dag() - a.dag() *U.dag() * a *U) **2 )		
-
-				OTOC[iCutoff,idrive,iTime] += np.real( qt.expect( OTOOperator, vac) )
-
+	eigenvalues = np.array( [[[ ppCEigenval(N,d,t) for t in times ] for d in dList] for N in cutoffList] )
 
 	###Save data to numpy file 
 	np.save("cutoffList.npy", cutoffList)
 	np.save("dList.npy", dList)
 	np.save("times.npy", times)
-	np.save("OTOC.npy", OTOC)
+	np.save("eigenvalues.npy", eigenvalues)
 	
 
 if __name__ == "__main__":
